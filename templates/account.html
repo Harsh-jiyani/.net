@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Account | Astro Chatbot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Reset and Globals */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e0037, #000000);
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: center;
+        }
+
+        /* Background Animation */
+        .stars, .twinkling {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: url("https://www.transparenttextures.com/patterns/stardust.png") repeat;
+            animation: moveStars 200s linear infinite;
+            opacity: 0.4;
+        }
+
+        .stars {
+            animation: moveStars 200s linear infinite;
+        }
+
+        .twinkling {
+            animation: moveTwinkling 1000s linear infinite;
+        }
+
+        @keyframes moveStars {
+            from { background-position: 0 0; }
+            to { background-position: -10000px 5000px; }
+        }
+
+        @keyframes moveTwinkling {
+            from { background-position: 0 0; }
+            to { background-position: 5000px 5000px; }
+        }
+
+        /* Account Container */
+        .account-container {
+            position: relative;
+            width: 100%;
+            max-width: 95%;
+            padding: 20px;
+            border-radius: 18px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 6px 15px rgba(0, 255, 255, 0.08);
+            color: #fff;
+            z-index: 2;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-grow: 1;
+            justify-content: space-around;
+        }
+
+        .account-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            letter-spacing: 0.6px;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        /* Profile Section */
+        .profile-section {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .profile-pic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(15, 255, 193, 0.6);
+            margin-bottom: 0;
+            box-shadow: 0 1px 3px rgba(0, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .profile-pic:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 5px rgba(0, 255, 255, 0.1);
+        }
+
+        .profile-upload {
+            display: none;
+        }
+
+        .upload-btn {
+            background: rgba(15, 255, 193, 0.2);
+            color: #0fffc1;
+            padding: 6px 12px;
+            border-radius: 18px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .upload-btn:hover {
+            background: rgba(15, 255, 193, 0.3);
+            border-color: #0fffc1;
+        }
+
+        .username {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 0;
+            color: #fff;
+            letter-spacing: 0.2px;
+        }
+
+        /* Details Section */
+        .details-section {
+            width: 100%;
+            margin-bottom: 30px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .detail-item {
+            margin-bottom: 15px;
+        }
+
+        .detail-item label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 10px;
+            color: #aaa;
+            font-weight: 500;
+            letter-spacing: 0.1px;
+        }
+
+        .detail-item input, .detail-item textarea {
+            width: 100%;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            outline: none;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .detail-item input:focus,
+        .detail-item textarea:focus {
+            border-color: #0fffc1;
+            box-shadow: 0 1px 3px rgba(0, 255, 255, 0.03);
+        }
+
+        .detail-item textarea {
+            height: 60px;
+            resize: vertical;
+            border-radius: 4px;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: auto;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            min-width: 150px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border: 2px solid transparent;
+        }
+
+        .save-btn {
+            background: linear-gradient(90deg, #0fffc1, #00f7ff);
+            color: #000;
+        }
+
+        .save-btn:hover {
+            background: linear-gradient(90deg, #00f7ff, #0fffc1);
+            box-shadow: 0 4px 10px rgba(0, 255, 255, 0.1);
+            border-color: #0fffc1;
+        }
+
+        .logout-btn {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff6666;
+            border: 2px solid rgba(255, 0, 0, 0.3);
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 0, 0, 0.3);
+            box-shadow: 0 4px 10px rgba(255, 0, 0, 0.1);
+            border-color: #ff6666;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+
+    <div class="account-container">
+        <h2>👨‍🚀 Your Account</h2>
+
+        <div class="profile-section">
+            <img src="{{ url_for('static', filename='images/default-profile.png') }}" alt="Profile" class="profile-pic" id="profilePic">
+            <div>
+                <div class="username" id="accountUsername">
+                    {% if username %}
+                        {{ username }}
+                    {% else %}
+                        User
+                    {% endif %}
+                </div>
+                <br><br>
+                <input type="file" id="profileUpload" class="profile-upload" accept="image/*">
+                <label for="profileUpload" class="upload-btn">Change Profile Picture</label><br>
+            </div>
+        </div>
+
+        <div class="details-section">
+            <div class="detail-item">
+                <label>Full Name</label>
+                <input type="text" value="John Doe" id="fullName" readonly>
+            </div>
+            <div class="detail-item">
+                <label>Email</label>
+                <input type="email" value="{% if username %}{{ username }}{% else %}user@example.com{% endif %}" id="email" readonly>
+            </div>
+            <div class="detail-item">
+                <label>Bio</label>
+                <textarea id="bio" readonly>Space enthusiast and astronomy lover</textarea>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn save-btn" id="saveChangesBtn">Edit Profile</button>
+            <button class="btn logout-btn" onclick="location.href='/logout'">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        // Profile picture upload preview
+        document.getElementById('profileUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('profilePic').src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Toggle edit mode
+        const fullNameInput = document.getElementById('fullName');
+        const emailInput = document.getElementById('email');
+        const bioTextarea = document.getElementById('bio');
+        const saveChangesBtn = document.getElementById('saveChangesBtn');
+        const usernameDisplay = document.getElementById('accountUsername'); // Get the username display element
+        const inputs = [fullNameInput, emailInput, bioTextarea];
+
+        let isEditing = false;
+
+        saveChangesBtn.addEventListener('click', function() {
+            isEditing = !isEditing;
+
+            inputs.forEach(input => {
+                input.readOnly = !isEditing;
+            });
+
+            saveChangesBtn.textContent = isEditing ? 'Save Changes' : 'Edit Profile';
+
+            // If saving, you would typically send data to the backend here
+            if (isEditing) {
+                // Enable borders to indicate editable fields
+                inputs.forEach(input => {
+                    input.style.borderColor = '#0fffc1';
+                });
+            } else {
+                // Disable borders after saving/cancelling
+                inputs.forEach(input => {
+                    input.style.borderColor = 'transparent';
+                });
+                // In a real application, you'd send the updated data to the server
+                console.log("Saving changes:", {
+                    fullName: fullNameInput.value,
+                    email: emailInput.value,
+                    bio: bioTextarea.value
+                });
+                // After a successful save (handled by backend response), you might want to update the displayed username if the email was changed.
+                // For now, we'll just log the changes.
+            }
+        });
+
+        // You might want to fetch the user's actual details (including username/email) when this page loads
+        // and update the input fields and the username display.
+        // Example of a potential fetch call on page load (you'd need a backend route for this):
+        /*
+        fetch('/api/user/details')
+            .then(response => response.json())
+            .then(data => {
+                if (data.username) {
+                    usernameDisplay.textContent = data.username;
+                    emailInput.value = data.username; // Assuming username is email for now
+                    fullNameInput.value = data.fullName || 'John Doe'; // Use actual data if available
+                    bioTextarea.value = data.bio || 'Space enthusiast and astronomy lover'; // Use actual data if available
+                }
+            })
+            .catch(error => console.error('Error fetching user details:', error));
+        */
+    </script>
+</body>
+</html>

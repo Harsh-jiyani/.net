@@ -1,0 +1,654 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AstroChat - Cosmic Astrology Assistant</title>
+
+    <style>
+        /* Base Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+    
+        /* Nebula Background */
+        body {
+            background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            min-height: 100vh;
+            color: #fff;
+            overflow: hidden;
+        }
+    
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    
+        /* Navigation Bar */
+        .astro-nav {
+    display: flex;
+    justify-content: space-between; /* Keep brand on left, links/button on right */
+    align-items: center; /* Vertically align items in the nav bar */
+    padding: 1rem 5%;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+}
+
+#refreshButton {
+    background: none;
+    border: none;
+    color: #00aaff;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    transition: color 0.3s;
+    padding: 0.5rem 0; /* Adjust vertical padding */
+    margin-left: 20px; /* Add some spacing from other potential links */
+}
+
+#refreshButton:hover {
+    color: #66d9ef;
+}
+    
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+    
+        /* Header Styling */
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+            color: white;
+            justify-content: space-between;
+        }
+    
+        .logo {
+            height: 50px;
+            width: auto;
+            margin-right: 15px;
+            border-radius: 10px;
+        }
+    
+        .title {
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            margin: 0;
+            color: white;
+        }
+    
+        .nav-links a {
+            margin-left: 20px;
+            color: #00aaff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+    
+        .nav-links a:hover {
+            color: #66d9ef;
+        }
+    
+        /* Main Content Layout */
+        .content-container {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 80px; /* Adjust for fixed navbar */
+            padding-left: 15px;
+            padding-right: 15px;
+            flex-grow: 1; /* Allow content container to grow vertically */
+        }
+    
+        /* Chat Section */
+        .chat-section {
+            flex: 1; /* Allows it to take available horizontal space */
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            margin-right: 15px;
+            flex-grow: 1;
+        }
+    
+        /* Chat Container */
+        .chat-container {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    backdrop-filter: blur(5px);
+    padding: 1.5rem;
+    display: flex;
+    margin-bottom: 1rem;
+    flex-direction: column;
+    overflow-y: auto; /* Make sure this is present */
+    max-height: 450px; /* Add this line and adjust the value as needed */
+    flex-grow: 1;
+}
+
+.prediction-area {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    color: white;
+    border-radius: 10px;
+    font-size: 0.9em;
+    overflow: hidden; /* Hide the text initially */
+    white-space: nowrap; /* Prevent text from wrapping */
+    border-right: .15em solid transparent; /* Blinking cursor effect */
+    animation: typing 3s steps(40, end), /* Adjust steps based on average character count */
+               blinking-cursor .75s step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+}
+
+@keyframes blinking-cursor {
+    from, to { border-color: transparent }
+    50% { border-color: white }
+}
+    
+        /* Chat History */
+        .chat-history {
+            flex: 1; /* Allow chat history to take up available space */
+            overflow-y: auto;
+            margin-bottom: 0px; /* Removed the bottom margin */
+            display: flex;
+            flex-direction: column;
+        }
+    
+        .message {
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            color: white;
+            font-size: 0.9em;
+            align-self: flex-start;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+    
+        .message.user {
+            background-color: #00aaff;
+            color: white;
+            align-self: flex-end;
+        }
+    
+        /* Option Container */
+        .option-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem; /* Moved to bottom */
+        }
+    
+        .option-button {
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            border: none;
+            padding: 0.8rem 1rem;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.9em;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+    
+        .option-button:hover {
+            background-color: #00aaff;
+        }
+    
+        .prediction-area {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            color: white;
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+    
+        .next-button {
+            background-color: #66d9ef;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+            margin-top: 1rem;
+            display: none;
+        }
+    
+        .next-button:hover {
+            background-color: #00aaff;
+        }
+    
+        .progress-text {
+            color: #66d9ef;
+            font-style: italic;
+            margin-bottom: 0.5rem;
+        }
+    
+        /* Right Section (Upload Section) */
+        .right-sidebar {
+            width: 100%;
+            max-width: 300px;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            flex-grow: 1; /* Allow it to grow vertically within content-container */
+        }
+    
+        .upload-container {
+            margin-top: 20px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+    
+        .upload-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px; /* Add margin at the bottom of the upload box */
+        }
+    
+        .upload-label {
+            cursor: pointer;
+            display: inline-block;
+            background-color: #00aaff;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            transition: background-color 0.3s;
+            font-size: 0.9em;
+        }
+    
+        .upload-label:hover {
+            background-color: #66d9ef;
+        }
+    
+        .preview-canvas {
+            width: 100%;
+            height: auto;
+            max-height: 150px;
+            border-radius: 10px;
+            margin-top: 15px;
+            background-color: #fff;
+        }
+    
+        .upload-icon {
+            font-size: 1.2em;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+    
+        /* Star Animation */
+        .stars {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            background: transparent;
+        }
+    
+    
+        .account-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            border-radius: 5px;
+            display: none;
+        }
+    
+        .account-dropdown:hover  {
+            color: red;
+        }
+    
+        .account-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+    
+        .twinkling {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            background: transparent;
+        }
+    
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content-container {
+                flex-direction: column;
+            }
+    
+            .chat-section {
+                margin-right: 0;
+                margin-bottom: 20px;
+                height: none;
+            }
+    
+            .right-sidebar {
+                max-width: 100%;
+                margin-left: 0;
+                margin-top: 20px;
+            }
+    
+            .upload-box {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/astrodata.js') }}"></script>
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+
+    <nav class="astro-nav">
+        <div class="nav-brand">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="AstroChat Logo" class="logo" style="height: 35px;">
+            <h1>AstroChat</h1>
+        </div>
+        <div class="nav-links">
+        </div>
+        
+    </div>
+        <div class="account-dropdown" id="accountDropdown">
+            <div class="dropdown-content">
+                <a href="account.html">Profile</a>
+                <a href="signup.html">Signup</a>
+                <a href="login.html">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="content-container">
+        <section class="chat-section">
+            <div class="chat-container" id="chatContainer">
+                <div class="chat-history" id="chatHistory">
+                    </div>
+                <div id="optionContainer" class="option-container">
+                    <button id="startButton" class="option-button" disabled>Start Astrological Analysis</button>
+                </div>
+                <button id="refreshButton" class="nav-button" aria-label="Start New Analysis">
+                    Refresh
+                </button>
+            </div>
+            </section>
+    
+        <aside class="right-sidebar">
+            <div class="upload-container">
+                <h3>Upload Birth Chart</h3>
+                <div class="upload-box">
+                    <input type="file" id="birthChart" accept=".pdf,.png,.jpg" hidden>
+                    <label for="birthChart" class="upload-label">
+                        <span class="upload-icon">↑</span>
+                        <span> Click to Upload</span>
+                    </label>
+                    <canvas id="chartPreview" class="preview-canvas"></canvas>
+                    <div id="uploadStatus" style="color: #66d9ef; font-size: 0.8em; margin-top: 5px; text-align: center;"></div>
+                </div>
+            </div>
+        </aside>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('birthChart');
+            const canvas = document.getElementById('chartPreview');
+            const ctx = canvas.getContext('2d');
+            const chatContainer = document.getElementById('chatContainer');
+            const chatHistory = document.getElementById('chatHistory');
+            const optionContainer = document.getElementById('optionContainer');
+            const startButton = document.getElementById('startButton');
+            const predictionArea = document.querySelector('.prediction-area'); // Get prediction area
+    
+            let currentStep = 0;
+            let selectedPlanet = null;
+            let selectedHouse = null;
+            let selectedSign = null;
+            const planets = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"];
+            const houses = ["1st House", "2nd House", "3rd House", "4th House", "5th House", "6th House", "7th House", "8th House", "9th House", "10th House", "11th House", "12th House"];
+            const zodiacSigns = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
+    
+            const chatMessages = [];
+    
+            const birthChartInput = document.getElementById('birthChart');
+            const uploadStatus = document.getElementById('uploadStatus');
+            let imageUploaded = false;
+    
+            birthChartInput.addEventListener('change', function() {
+                console.log('birthChart input changed'); // Debugging
+                if (this.files.length > 0) {
+                    imageUploaded = true;
+                    startButton.disabled = false;
+                    uploadStatus.textContent = 'Image Uploaded!';
+                    console.log('ImageUploaded set to true, Start button enabled'); // Debugging
+                } else {
+                    imageUploaded = false;
+                    startButton.disabled = true;
+                    uploadStatus.textContent = '';
+                    console.log('No file selected, ImageUploaded set to false, Start button disabled'); // Debugging
+                }
+            });
+    
+            fileInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                console.log('fileInput change triggered', file); // Debugging
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = new Image();
+                        img.onload = function() {
+                            const aspectRatio = img.width / img.height;
+                            canvas.height = Math.min(150, img.height);
+                            canvas.width = canvas.height * aspectRatio;
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            console.log('Image loaded onto canvas', { width: canvas.width, height: canvas.height }); // Debugging
+                        }
+                        img.src = e.target.result;
+                        console.log('Image source set', img.src); // Debugging
+                    }
+                    reader.readAsDataURL(file);
+                    console.log('FileReader reading as DataURL'); // Debugging
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    canvas.width = 0;
+                    canvas.height = 0;
+                    console.log('No file, canvas cleared'); // Debugging
+                }
+            });
+    
+            const savedChatHistory = localStorage.getItem('astroChatHistory');
+            if (savedChatHistory) {
+                const parsedHistory = JSON.parse(savedChatHistory);
+                parsedHistory.forEach(message => {
+                    addMessage(message.text, message.sender);
+                });
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            }
+    
+            function showOptions(options, step) {
+                optionContainer.innerHTML = '';
+                if (step > 0 && step !== 'next-chat' && step !== 'insights') {
+                    const progressText = document.createElement('p');
+                    progressText.classList.add('progress-text');
+                    let progress = "";
+                    if (selectedPlanet) progress += selectedPlanet;
+                    if (selectedHouse) progress += ` in ${selectedHouse}`;
+                    if (selectedSign) progress += ` with ${selectedSign}`;
+                    progressText.textContent = progress;
+                    addMessage(progressText.textContent, 'bot-progress');
+                }
+    
+                options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.classList.add('option-button');
+                    button.textContent = option;
+                    button.addEventListener('click', () => handleOptionClick(option, step));
+                    optionContainer.appendChild(button);
+                });
+            }
+    
+            function handleOptionClick(option, step) {
+                if (step === 0) {
+                    selectedPlanet = option;
+                    addMessage(`You selected: ${option}`, 'user');
+                    currentStep++;
+                    showOptions(houses, currentStep);
+                } else if (step === 1) {
+                    selectedHouse = option;
+                    addMessage(`You selected: ${option}`, 'user');
+                    currentStep++;
+                    showOptions(zodiacSigns, currentStep);
+                } else if (step === 2) {
+                    selectedSign = option;
+                    addMessage(`You selected: ${option}`, 'user');
+                    currentStep++;
+                    const remainingPlanets = planets.filter(p => p !== selectedPlanet);
+                    remainingPlanets.push("None");
+                    showOptions(remainingPlanets, currentStep);
+                } else if (step === 3) {
+                    const conjunctionPlanet = option === "None" ? null : option;
+                    const finalCombination = `${selectedPlanet} in ${selectedHouse} in ${selectedSign}${conjunctionPlanet ? ' with ' + conjunctionPlanet : ''}`;
+                    addMessage(`You selected: ${option}`, 'user');
+                    displayPrediction(finalCombination);
+                    currentStep = 4; // Update step after initial prediction
+                } else if (step === 'next-chat') {
+                    addMessage(`You selected: ${option}`, 'user');
+                    if (option === "Ask another question") {
+                        showOptions(planets, 0);
+                        currentStep = 0;
+                        selectedPlanet = null;
+                        selectedHouse = null;
+                        selectedSign = null;
+    
+                    }
+                    // "Get more insights" logic removed here
+                } else if (step === 'insights') {
+                    addMessage(`You want insights about: ${option}`, 'user');
+                    const insightPrediction = getInsightPrediction(option, `${selectedPlanet} in ${selectedHouse} in ${selectedSign}`);
+                    addMessage(insightPrediction, 'bot');
+                    const nextChatOptionsAgain = ["Ask another question"]; // "Get more insights" removed
+                    showOptions(nextChatOptionsAgain, 'next-chat');
+                }
+            }
+    
+            function displayPrediction(combination) {
+                const prediction = getPrediction(combination);
+                const messageText = prediction
+                    ? `Prediction for ${combination}: ${prediction}`
+                    : `No specific prediction found for ${combination}.`;
+                addMessage(messageText, 'bot');
+                optionContainer.innerHTML = '';
+                const nextChatOptions = ["Ask another question"]; // "Get more insights" removed
+                showOptions(nextChatOptions, 'next-chat');
+            }
+    
+            function addMessage(text, sender) {
+                const message = document.createElement('div');
+                message.classList.add('message');
+                message.classList.add(sender);
+                message.textContent = text;
+                chatHistory.appendChild(message);
+                chatMessages.push({ sender: sender, text: text });
+                localStorage.setItem('astroChatHistory', JSON.stringify(chatMessages));
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            }
+    
+            startButton.addEventListener('click', () => {
+                if (!imageUploaded) {
+                    alert("Please upload your birth chart image before starting the analysis.");
+                } else {
+                    currentStep = 0;
+                    selectedPlanet = null;
+                    selectedHouse = null;
+                    selectedSign = null;
+                    chatHistory.innerHTML = '';
+                    chatMessages.length = 0;
+                    localStorage.removeItem('astroChatHistory'); // Clear history on a truly new start
+                    showOptions(planets, currentStep);
+                    addMessage("Starting New Analysis", 'bot');
+                }
+            });
+    
+            function getPrediction(combination) {
+                console.log(`Looking for prediction for: ${combination}`);
+                return `Prediction for ${combination}: Sample Prediction: This combination suggests a communicative and adaptable nature.`;
+            }
+    
+            function getInsightPrediction(insightType, currentCombination) {
+                console.log(`Looking for ${insightType} prediction for: ${currentCombination}`);
+                return `Insight for ${insightType} based on ${currentCombination}: This is a general insight related to ${insightType}.`;
+            }
+    
+            // Refresh button functionality
+            const refreshButton = document.getElementById('refreshButton');
+            if (refreshButton) {
+                console.log('Refresh button found. Attaching event listener...');
+                refreshButton.addEventListener('click', function() {
+                    if (chatHistory) {
+                        chatHistory.innerHTML = ''; // Clear all messages from the chat history
+                    }
+                    if (predictionArea) {
+                        predictionArea.innerHTML = ''; // Clear any existing prediction
+                    }
+                    console.log('Chat cleared. Starting new analysis.');
+                });
+            } else {
+                console.error('Refresh button element not found!');
+            }
+    
+            // Typing effect function (it's better to define it within the DOMContentLoaded for element access)
+            function typeWriter(text, element, speed) {
+                let i = 0;
+                element.innerHTML = ''; /* Clear the element */
+                const intervalId = setInterval(() => {
+                    if (i < text.length) {
+                        element.innerHTML += text.charAt(i);
+                        i++;
+                    } else {
+                        clearInterval(intervalId);
+                    }
+                }, speed);
+            }
+    
+            // Example usage of typing effect (if predictionArea exists)
+            if (predictionArea) {
+                const predictionText = "Prediction for Uranus in 7th House with Virgo: This combination suggests a communicative and adaptable nature.";
+                const typingSpeed = 50;
+                typeWriter(predictionText, predictionArea, typingSpeed);
+            }
+        });
+    </script>
+</body>
+</html>
